@@ -1,0 +1,17 @@
+package rawllm
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/jalusw/cycle/internal/runner"
+	"github.com/jalusw/cycle/internal/domain"
+)
+
+type Adapter struct{}
+
+func New() (runner.Runner, error)             { return &Adapter{}, nil }
+func (a *Adapter) Name() string               { return "rawllm" }
+func (a *Adapter) Start(ctx context.Context, spec domain.RunSpec) (runner.Handle, error) {
+	return nil, fmt.Errorf("rawllm adapter: not implemented")
+}

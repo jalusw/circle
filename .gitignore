@@ -1,0 +1,7 @@
+BIN/
+DATABASE=
+/cycle.db
+*.db
+/dist/
+.env
+.DS_Store

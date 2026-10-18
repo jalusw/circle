@@ -1,0 +1,14 @@
+# Cycle project-level config (defaults; may be overridden per repo)
+runners:
+  default: opencode
+  enabled:
+    - opencode
+    - claude
+    - rawllm
+
+budgets:
+  max_retries: 3
+  timeout_minutes: 15
+
+sandbox:
+  mode: worktree  # worktree | container
