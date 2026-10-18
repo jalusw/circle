@@ -1,4 +1,4 @@
-module github.com/jalusw/cycle
+module github.com/jalusw/circle
 
 go 1.27
 

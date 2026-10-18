@@ -1,7 +1,7 @@
 package orchestrator
 
 import (
-	"github.com/jalusw/cycle/internal/runner"
+	"github.com/jalusw/circle/internal/runner"
 )
 
 type Orchestrator struct {

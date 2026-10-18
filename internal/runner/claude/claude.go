@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jalusw/cycle/internal/runner"
-	"github.com/jalusw/cycle/internal/domain"
+	"github.com/jalusw/circle/internal/runner"
+	"github.com/jalusw/circle/internal/domain"
 )
 
 type Adapter struct{}

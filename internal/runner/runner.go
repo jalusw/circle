@@ -3,7 +3,7 @@ package runner
 import (
 	"context"
 
-	"github.com/jalusw/cycle/internal/domain"
+	"github.com/jalusw/circle/internal/domain"
 )
 
 type Runner interface {

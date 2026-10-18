@@ -1,4 +1,4 @@
-# Cycle project-level config (defaults; may be overridden per repo)
+# Circle project-level config (defaults; may be overridden per repo)
 runners:
   default: opencode
   enabled:

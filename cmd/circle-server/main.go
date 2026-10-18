@@ -4,12 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jalusw/cycle/internal/api"
-	"github.com/jalusw/cycle/internal/store"
+	"github.com/jalusw/circle/internal/api"
+	"github.com/jalusw/circle/internal/store"
 )
 
 func main() {
-	s, err := store.Open("cycle.db")
+	s, err := store.Open("circle.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,6 +20,6 @@ func main() {
 
 	mux := http.NewServeMux()
 	api.New(mux).Routes()
-	log.Println("cycle-server: listening on :8080")
+	log.Println("circle-server: listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
