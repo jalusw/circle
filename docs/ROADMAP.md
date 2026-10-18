@@ -2,7 +2,8 @@
 
 The lifecycle is TDD-driven: **ideation → planning → implementation → testing
 → review → merge**, with failing tests written before implementation. See
-[LIFECYCLE.md](LIFECYCLE.md) for the full cycle and state transitions.
+[LIFECYCLE.md](LIFECYCLE.md) for the full cycle and state transitions, and
+[OUTCOMES.md](OUTCOMES.md) for the contract-first, gate-based delivery model.
 
 ## v0 — vertical slice
 - [ ] store: story/task/run CRUD + migrations
@@ -18,6 +19,7 @@ The lifecycle is TDD-driven: **ideation → planning → implementation → test
 - [ ] QA / QC gate: human acceptance sign-off (manual, never auto-passed)
 - [ ] budgets: $, tokens, time, retries; kill-switch
 - [ ] failure loop: red tests → feed errors → retry (cap N)
+- [ ] gates: behavior + constraint + risk/critic, normalized to `Verdict`/`Finding` (see [OUTCOMES.md](OUTCOMES.md))
 - [ ] approval gates + diff review UI
 - [ ] circle-tui: live event streams
 - [ ] web ui parity
@@ -28,3 +30,4 @@ The lifecycle is TDD-driven: **ideation → planning → implementation → test
 - [ ] GitHub PR automation
 - [ ] remote server (multi-user)
 - [ ] planner promotion: rawllm planner → planner runner
+- [ ] portfolio runs: N candidates per contract, gate-selected winner
