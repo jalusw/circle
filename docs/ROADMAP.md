@@ -12,8 +12,9 @@ The lifecycle is TDD-driven: **ideation → planning → implementation → test
 - [ ] gitops: create worktree, extract diff, merge locally
 
 ## v1 — solid lifecycle
-- [ ] planning: story → tasks with acceptance tests (written first)
-- [ ] TDD gate: red → green → refactor before review
+- [ ] planning: story → tasks with locked acceptance criteria
+- [ ] TDD gate: agent tests red → green → refactor before QA
+- [ ] QA / QC gate: human acceptance sign-off (manual, never auto-passed)
 - [ ] budgets: $, tokens, time, retries; kill-switch
 - [ ] failure loop: red tests → feed errors → retry (cap N)
 - [ ] approval gates + diff review UI

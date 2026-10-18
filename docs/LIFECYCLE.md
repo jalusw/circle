@@ -12,14 +12,16 @@ flowchart TB
 
     subgraph Server["circle-server"]
         Intake["Ideation<br/>stories / PRDs"]
-        Plan["Planning<br/>story → tasks<br/>acceptance tests written first"]
+        Plan["Planning<br/>story → tasks<br/>acceptance criteria locked"]
         Queue["Queue<br/>(SQLite)"]
         Orch["Orchestrator<br/>budgets · retries"]
-        Test["Testing · TDD gate<br/>red → green → refactor"]
+        Test["Testing · TDD gate<br/>agent tests red → green → refactor"]
+        QA["QA / QC<br/>human acceptance sign-off"]
         Review["Review<br/>diffs · approvals"]
         Merge["Merge<br/>back to main"]
-        Intake --> Plan --> Queue --> Orch --> Test --> Review --> Merge
+        Intake --> Plan --> Queue --> Orch --> Test --> QA --> Review --> Merge
         Test -->|"red — feed errors<br/>retry (cap N)"| Orch
+        QA -->|"criteria not met"| Orch
     end
 
     subgraph Runners["runner adapters (pluggable)"]
@@ -43,18 +45,49 @@ flowchart TB
 | Stage          | Input                    | Output                              |
 | -------------- | ------------------------ | ----------------------------------- |
 | Ideation       | idea / PRD               | `Story` (draft)                     |
-| Planning       | `Story`                  | `Task`s + acceptance tests (red)    |
+| Planning       | `Story`                  | `Task`s + locked acceptance criteria|
 | Implementation | `Task`                   | worktree changes (red → green)      |
-| Testing        | worktree                 | green tests + diff, or retry        |
-| Review         | diff                     | approval or re-queue                |
+| Testing        | worktree                 | agent tests green + diff, or retry  |
+| QA / QC        | green diff               | human acceptance sign-off           |
+| Review         | approved diff            | approval or re-queue                |
 | Merge          | approved diff            | change on main                      |
 
-## Test gate
+## Test layers
 
-Failing acceptance tests are written at planning time. The gate only releases a
-task to review on **green**; a **red** result feeds the errors back to the
-orchestrator for a bounded retry (`budgets.max_retries` in
-`.circle/config.yaml`).
+Testing is split along two independent axes: **who authored** it and **what
+gates** it.
+
+| Layer                     | Author | Purpose                                        | Gate       |
+| ------------------------- | ------ | ---------------------------------------------- | ---------- |
+| Acceptance (QA / QC)      | human  | prove the user acceptance criteria are met     | manual     |
+| Coverage / edge / pattern | agent  | coverage, edge cases, common patterns, regress | automated  |
+
+- **Human acceptance tests** are authored during planning from the locked
+  acceptance criteria and verified by a person (`verified_by`). They are
+  read-only to runners — an agent must never be able to rewrite the tests that
+  judge it.
+- **Agent tests** are authored during implementation and run in the automated
+  TDD gate.
+
+The automated gate only releases a task on **green**; a **red** result feeds
+the errors back to the orchestrator for a bounded retry (`budgets.max_retries`
+in `.circle/config.yaml`). The manual gate is never auto-passed: the task parks
+until a human identity records the sign-off.
+
+```sql
+CREATE TABLE IF NOT EXISTS tests (
+    id          TEXT PRIMARY KEY,
+    task_id     TEXT NOT NULL REFERENCES tasks(id),
+    author      TEXT NOT NULL,   -- human | agent
+    kind        TEXT NOT NULL,   -- acceptance | coverage | edge | pattern | regression
+    title       TEXT NOT NULL,
+    body        TEXT NOT NULL,
+    status      TEXT NOT NULL,   -- pending | pass | fail
+    evidence    TEXT,            -- log / diff / screenshot ref
+    verified_by TEXT,            -- required when author = human
+    verified_at DATETIME
+);
+```
 
 ## State transitions
 
@@ -62,4 +95,6 @@ Story (`internal/domain/story.go`): `draft → triaged → planned → done`, pl
 `cancelled`.
 
 Task (`internal/domain/task.go`): `queued → running → review → merged`, with
-`failed` and re-queue loops. The TDD gate sits inside `running → review`.
+`failed` and re-queue loops. The automated TDD gate sits inside
+`running → review`; the human QA gate sits between them and must be cleared
+before review.
