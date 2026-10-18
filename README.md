@@ -1,9 +1,10 @@
 # circle
 
-Agent-orchestration platform for the full software lifecycle.
-Submit a user story → it is broken into tasks → coding agents (opencode,
-claude code, raw LLM) execute them in git worktrees → diffs are reviewed
-→ merge.
+Agent-orchestration platform for the full SDLC, TDD-driven.
+Submit a user story → it is planned into tasks with acceptance tests
+(failing tests first) → coding agents (opencode, claude code, raw LLM)
+implement them in git worktrees red → green → refactor → tests gate
+progress → diffs are reviewed → merge.
 
 ```mermaid
 flowchart TB
@@ -12,11 +13,15 @@ flowchart TB
     CLI["CLI<br/>(circle)"]
 
     subgraph Server["circle-server"]
-        Intake["Intake<br/>stories / PRDs"]
+        Intake["Ideation<br/>stories / PRDs"]
+        Plan["Planning<br/>story → tasks<br/>acceptance tests written first"]
         Queue["Queue<br/>(SQLite)"]
         Orch["Orchestrator<br/>budgets · retries"]
+        Test["Testing · TDD gate<br/>red → green → refactor"]
         Review["Review<br/>diffs · approvals"]
-        Intake --> Queue --> Orch --> Review
+        Merge["Merge<br/>back to main"]
+        Intake --> Plan --> Queue --> Orch --> Test --> Review --> Merge
+        Test -->|"red — feed errors<br/>retry (cap N)"| Orch
     end
 
     subgraph Runners["runner adapters (pluggable)"]
@@ -32,6 +37,7 @@ flowchart TB
     TUI -->|HTTP+SSE| Server
     Orch --> Runners
     Runners --> Worktrees
+    Test -->|"green — diff extracted"| Worktrees
 ```
 
 ## Layout
