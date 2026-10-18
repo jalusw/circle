@@ -2,7 +2,8 @@
 
 circle drives the full SDLC with a TDD approach:
 
-**ideation → planning → implementation → testing → review → merge**
+**ideation → planning → design (tech analysis) → implementation → testing →
+review → merge**
 
 ```mermaid
 flowchart TB
@@ -13,13 +14,14 @@ flowchart TB
     subgraph Server["circle-server"]
         Intake["Ideation<br/>stories / PRDs"]
         Plan["Planning<br/>story → tasks<br/>acceptance criteria locked"]
+        Design["Design · tech analysis<br/>stack · platform · libraries<br/>→ ADR"]
         Queue["Queue<br/>(SQLite)"]
         Orch["Orchestrator<br/>budgets · retries"]
         Test["Testing · TDD gate<br/>agent tests red → green → refactor"]
         QA["QA / QC<br/>human acceptance sign-off"]
         Review["Review<br/>diffs · approvals"]
         Merge["Merge<br/>back to main"]
-        Intake --> Plan --> Queue --> Orch --> Test --> QA --> Review --> Merge
+        Intake --> Plan --> Design --> Queue --> Orch --> Test --> QA --> Review --> Merge
         Test -->|"red — feed errors<br/>retry (cap N)"| Orch
         QA -->|"criteria not met"| Orch
     end
@@ -42,15 +44,30 @@ flowchart TB
 
 ## Stages
 
-| Stage          | Input                    | Output                              |
-| -------------- | ------------------------ | ----------------------------------- |
-| Ideation       | idea / PRD               | `Story` (draft)                     |
-| Planning       | `Story`                  | `Task`s + locked acceptance criteria|
-| Implementation | `Task`                   | worktree changes (red → green)      |
-| Testing        | worktree                 | agent tests green + diff, or retry  |
-| QA / QC        | green diff               | human acceptance sign-off           |
-| Review         | approved diff            | approval or re-queue                |
-| Merge          | approved diff            | change on main                      |
+| Stage           | Input                    | Output                              |
+| --------------- | ------------------------ | ----------------------------------- |
+| Ideation        | idea / PRD               | `Story` (draft)                     |
+| Planning        | `Story`                  | `Task`s + locked acceptance criteria|
+| Design          | `Task`s + constraints    | ADR: stack, platform, libraries     |
+| Implementation  | `Task`                   | worktree changes (red → green)      |
+| Testing         | worktree                 | agent tests green + diff, or retry  |
+| QA / QC         | green diff               | human acceptance sign-off           |
+| Review          | approved diff            | approval or re-queue                |
+| Merge           | approved diff            | change on main                      |
+
+## Tech analysis
+
+Before implementation, the requirements are analyzed against the technology that
+can satisfy them. This stage selects:
+
+- **Stack** — language, framework, runtime
+- **Platform** — host, CI, deployment target, managed services
+- **Libraries / infra** — dependencies, datastores, integrations
+
+Output is a decision record (ADR) attached to the story/tasks. Agents can
+propose and compare options, but consequential choices (platform, paid services,
+external infra) are a **human gate** — the same manual-approval rule as QA. The
+chosen stack then becomes a constraint passed into every runner for that story.
 
 ## Test layers
 
@@ -92,9 +109,10 @@ CREATE TABLE IF NOT EXISTS tests (
 ## State transitions
 
 Story (`internal/domain/story.go`): `draft → triaged → planned → done`, plus
-`cancelled`.
+`cancelled`. A `designed` status after the tech-analysis gate is still to be
+added.
 
 Task (`internal/domain/task.go`): `queued → running → review → merged`, with
 `failed` and re-queue loops. The automated TDD gate sits inside
 `running → review`; the human QA gate sits between them and must be cleared
-before review.
+before review. Tech analysis runs once per story before tasks are queued.

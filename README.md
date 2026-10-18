@@ -2,9 +2,10 @@
 
 Agent-orchestration platform for the full SDLC, TDD-driven.
 Submit a user story → it is planned into tasks with acceptance tests
-(failing tests first) → coding agents (opencode, claude code, raw LLM)
-implement them in git worktrees red → green → refactor → tests gate
-progress → diffs are reviewed → merge.
+(failing tests first) → tech/platform options are analyzed against the
+requirements → coding agents (opencode, claude code, raw LLM) implement
+them in git worktrees red → green → refactor → tests gate progress →
+human QA sign-off → diffs are reviewed → merge.
 
 ```mermaid
 flowchart TB
@@ -15,13 +16,16 @@ flowchart TB
     subgraph Server["circle-server"]
         Intake["Ideation<br/>stories / PRDs"]
         Plan["Planning<br/>story → tasks<br/>acceptance tests written first"]
+        Design["Design · tech analysis<br/>stack · platform · libraries<br/>→ ADR"]
         Queue["Queue<br/>(SQLite)"]
         Orch["Orchestrator<br/>budgets · retries"]
         Test["Testing · TDD gate<br/>red → green → refactor"]
+        QA["QA / QC<br/>human acceptance sign-off"]
         Review["Review<br/>diffs · approvals"]
         Merge["Merge<br/>back to main"]
-        Intake --> Plan --> Queue --> Orch --> Test --> Review --> Merge
+        Intake --> Plan --> Design --> Queue --> Orch --> Test --> QA --> Review --> Merge
         Test -->|"red — feed errors<br/>retry (cap N)"| Orch
+        QA -->|"criteria not met"| Orch
     end
 
     subgraph Runners["runner adapters (pluggable)"]

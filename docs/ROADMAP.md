@@ -13,6 +13,7 @@ The lifecycle is TDD-driven: **ideation → planning → implementation → test
 
 ## v1 — solid lifecycle
 - [ ] planning: story → tasks with locked acceptance criteria
+- [ ] design: tech analysis → ADR (stack, platform, libraries), human-approved
 - [ ] TDD gate: agent tests red → green → refactor before QA
 - [ ] QA / QC gate: human acceptance sign-off (manual, never auto-passed)
 - [ ] budgets: $, tokens, time, retries; kill-switch
